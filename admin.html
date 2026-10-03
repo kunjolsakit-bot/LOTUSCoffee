@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard | Lotus Coffee</title>
+<link rel="icon" href="https://lotuscoffee.store/asset/img/Logo.1.png" type="image/png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" rel="stylesheet">
+<link href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Marcellus&display=swap" rel="stylesheet">
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          pink: {
+            50: '#fdf2f8',
+            100: '#fce7f3',
+            200: '#fbcfe8',
+            600: '#db2777',
+            700: '#be185d',
+            800: '#9d174d',
+            900: '#831843', // Tema Pink Gelap
+            950: '#500724'
+          }
+        },
+        fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'], serif: ['Marcellus', 'serif'] }
+      }
+    }
+  }
+</script>
+
+<style>
+  body { background: #fff5f9; color: #1f1147; }
+  .hide { display: none !important; }
+  .modal-overlay { background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); }
+  .toggle-checkbox:checked { right: 0; border-color: #1100ff; }
+  .toggle-checkbox:checked + .toggle-label { background-color: #0800ff; }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: #db2777; }
+  @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .toast-anim { animation: slideDown 0.3s ease-out forwards; }
+
+  <!-- Markup: <div class="fx-stamp">APPROVED</div> -->
+
+/* Colour tokens — override to re-skin the effect:
+   --ink    main text colour (defaults to currentColor)
+   --ink-2  primary accent   --ink-3  secondary accent */
+:root { --ink: currentColor; --ink-2: #FF4FD8; --ink-3: #4FF8FF; }
+
+/* 66 Rubber-Stamp — the word slams down like an ink stamp, then fades off the page */
+.fx-stamp {
+  font: 600 26px/1 "JetBrains Mono", monospace;
+  letter-spacing: .14em;
+  color: var(--ink-2);
+  padding: .38em .5em;
+  border: 3px solid var(--ink-2);
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ink-2) 55%, transparent);
+  animation: fx-stamp 3.2s cubic-bezier(.22, 1.4, .36, 1) infinite;
+}
+@keyframes fx-stamp {
+  0%, 6%    { transform: rotate(-6deg) scale(2.4); opacity: 0; filter: blur(4px); }
+  14%       { transform: rotate(-6deg) scale(.96); opacity: 1; filter: blur(0); }
+  18%       { transform: rotate(-6deg) scale(1.04); }
+  22%, 78%  { transform: rotate(-6deg) scale(1); opacity: 1; filter: blur(0); }
+  94%, 100% { transform: rotate(-6deg) scale(1); opacity: 0; filter: blur(.6px); }
+}
+
+<!-- <div class="fx-extrude">DEPTH</div> -->
+
+/* Colour tokens — override to re-skin the effect:
+   --ink    main text colour (defaults to currentColor)
+   --ink-2  primary accent   --ink-3  secondary accent */
+:root { --ink: currentColor; --ink-2: #FF4FD8; --ink-3: #4FF8FF; }
+
+/* 14 Deep-Type — extruded 3D block letters rocking on their axis */
+.fx-extrude {
+  font: 600 34px/1.1 "JetBrains Mono", monospace;
+  letter-spacing: .08em;
+  color: var(--ink);
+  text-shadow:
+    1px 1px 0 color-mix(in srgb, var(--ink-2) 80%, #000),
+    2px 2px 0 color-mix(in srgb, var(--ink-2) 70%, #000),
+    3px 3px 0 color-mix(in srgb, var(--ink-2) 60%, #000),
+    4px 4px 0 color-mix(in srgb, var(--ink-2) 50%, #000),
+    5px 5px 0 color-mix(in srgb, var(--ink-2) 40%, #000),
+    6px 6px 0 color-mix(in srgb, var(--ink-2) 30%, #000),
+    7px 7px 12px rgba(0, 0, 0, .5);
+  animation: fx-extrude 3s ease-in-out infinite;
+}
+@keyframes fx-extrude {
+  0%, 100% { transform: rotate(-3.5deg) translateY(2px); }
+  50%      { transform: rotate(3.5deg)  translateY(-4px); }
+}
+</style>
+</head>
+<body class="text-gray-800">
+
+<!-- Login Overlay dengan Latar Belakang Video -->
+<div id="login-view" class="fixed inset-0 z-[100] flex flex-col items-center justify-center hide overflow-hidden">
+  <!-- Video Background -->
+  <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover z-0">
+    <source src="https://lotuscoffee.store/asset/vid/Vid1.mp4" type="video/mp4">
+  </video>
+  <!-- Gelap tipis agar form mudah dibaca -->
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-10"></div>
+
+  <!-- Kotak Form Login -->
+  <div class="bg-white/95 backdrop-blur-md p-8 md:p-10 rounded-3xl shadow-2xl border border-pink-100 w-full max-w-md relative z-20">
+    <div class="w-16 h-16 text-pink-700 flex items-center justify-center text-3xl mb-4 mx-auto">
+      <img src="https://lotuscoffee.store/asset/img/Logo.1.png" alt="Logo" class="w-full h-full object-contain">
+    </div>
+    <h2 class="fx-stamp font-serif text-2xl font-bold text-pink-900 text-center">Lotus Coffee</h2>
+    <p class="text-xs text-gray-500 text-center mt-1 mb-6">Masuk Ke Halaman Pengelola</p>
+    
+    <form id="login-form" class="space-y-4">
+      <div>
+        <label class="block text-sm font-semibold mb-1">Email</label>
+        <input id="email" type="email" required class="w-full p-3 rounded-xl border border-pink-200 outline-none focus:border-pink-600 bg-pink-50/30 text-sm" placeholder="Masukan Email Admin">
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Password</label>
+        <input id="password" type="password" required class="w-full p-3 rounded-xl border border-pink-200 outline-none focus:border-pink-600 bg-pink-50/30 text-sm" placeholder="••••••••">
+      </div>
+      <button type="submit" class="w-full rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-bold py-3.5 transition shadow-lg shadow-pink-600/20 "><p class="fx-extrude text-md">Masuk</p></button>
+    </form>
+    <p id="login-message" class="text-xs text-red-600 mt-3 text-center font-medium"></p>
+  </div>
+</div>
+
+<!-- Dashboard Interface -->
+<div id="dashboard-view" class="hide">
+  <header class="bg-pink-900 text-white sticky top-0 z-40 shadow-md">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div>
+        <p class="text-[8px] uppercase tracking-widest text-pink-200 font-bold mb-1">Dashboard Admin</p>
+        <a href="https://lotuscoffee.store" target="_blank"><h1 class="fx-extrude font-serif text-4xl md:text-2xl font-bold flex items-center gap-2">Lotus Coffee</h1></a>
+      </div>
+      <div class="flex items-center gap-2 md:gap-4">
+        <div id="save-status" class="text-xs text-pink-200 text-right hide hidden md:block">Belum ada perubahan</div>
+        <a href="https://lotuscoffee.store" target="_blank" class="hidden md:flex px-4 py-2 bg-pink-800 hover:bg-pink-700 rounded-full text-sm font-semibold transition border border-pink-200/20 items-center gap-1"><i class="ph ph-globe"></i> Lihat Website</a>
+        <button onclick="saveContentToServer()" class="px-5 py-2 bg-amber-400 hover:bg-amber-300 text-pink-950 rounded-full text-sm font-bold transition shadow-lg flex items-center gap-1"><i class="ph ph-cloud-arrow-up"></i> Simpan ke Server</button>
+        <button id="logout-button" class="w-9 h-9 rounded-full bg-red-500/20 text-blue-300 hover:bg-red-500 hover:text-white flex items-center justify-center transition"><i class="ph ph-sign-out"></i></i></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-8">
+    
+    <!-- Tabs Navigation -->
+    <div class="flex flex-wrap items-center gap-2 mb-8 bg-white p-2 rounded-2xl shadow-sm border border-pink-100 inline-flex">
+      <button onclick="switchTab('hero')" id="tab-hero" class="tab-btn px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-pink-900 text-white">
+        <i class="ph-fill ph-image"></i> Beranda
+      </button>
+      <button onclick="switchTab('menu')" id="tab-menu" class="tab-btn px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 text-gray-500 hover:bg-pink-50 hover:text-pink-900">
+        <i class="ph-fill ph-book-open"></i> Menu
+      </button>
+      <button onclick="switchTab('rekomendasi')" id="tab-rekomendasi" class="tab-btn px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 text-gray-500 hover:bg-pink-50 hover:text-pink-900">
+        <i class="ph-fill ph-star"></i> Rekomendasi
+      </button>
+      <button onclick="switchTab('pengaturan')" id="tab-pengaturan" class="tab-btn px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 text-gray-500 hover:bg-pink-50 hover:text-pink-900">
+        <i class="ph-fill ph-gear"></i> Pengaturan
+      </button>
+    </div>
+
+    <!-- TAB 1: HERO SECTION -->
+    <section id="view-hero" class="view-section">
+      <div class="flex justify-between items-end mb-6">
+        <div>
+          <h2 class="text-xl font-bold text-pink-900">Beranda</h2>
+          <p class="text-sm text-gray-500">Atur Slide gambar & video Halaman Beranda.</p>
+        </div>
+        <button onclick="openHeroModal()" class="bg-pink-900 hover:bg-pink-800 text-white px-5 py-2.5 rounded-full text-sm font-bold transition flex items-center gap-2 shadow-lg">
+          <i class="ph ph-plus"></i> Tambah Slide
+        </button>
+      </div>
+      <div id="hero-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </section>
+
+    <!-- TAB 2: MENU -->
+    <section id="view-menu" class="view-section hide">
+      <div class="flex justify-between items-end mb-6">
+        <div>
+          <h2 class="text-xl font-bold text-pink-900">Daftar Menu</h2>
+          <p class="text-sm text-gray-500">Atur nama, harga, gambar, kategori, dan status rekomendasi.</p>
+        </div>
+        <button onclick="openMenuModal()" class="bg-pink-900 hover:bg-pink-800 text-white px-5 py-2.5 rounded-full text-sm font-bold transition flex items-center gap-2 shadow-lg">
+          <i class="ph ph-plus"></i> Tambah Menu
+        </button>
+      </div>
+
+      <div class="flex flex-col md:flex-row gap-4 mb-6">
+        <div class="relative flex-1 max-w-md">
+          <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></i>
+          <input type="text" id="search-menu" placeholder="Cari menu..." class="w-full pl-11 pr-4 py-3 rounded-xl border border-pink-200 focus:border-pink-600 outline-none transition bg-white">
+        </div>
+        <select id="filter-category" class="pl-4 pr-10 py-3 rounded-xl border border-pink-200 focus:border-pink-600 outline-none bg-white font-medium text-gray-700">
+          <option value="all">Semua Kategori</option>
+          <option value="kopi">Kopi</option>
+          <option value="non-kopi">Non-Kopi</option>
+          <option value="makanan">Makanan</option>
+          <option value="cemilan">Cemilan</option>
+        </select>
+      </div>
+      <div id="menu-grid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5"></div>
+    </section>
+
+    <!-- TAB 3: REKOMENDASI -->
+    <section id="view-rekomendasi" class="view-section hide">
+      <div class="mb-6">
+        <h2 class="text-xl font-bold text-pink-900">Menu Rekomendasi</h2>
+        <p class="text-sm text-gray-500">Pilih menu yang tampil di carousel halaman utama. Atur urutan dengan tombol naik/turun.</p>
+      </div>
+      <div class="mb-10">
+        <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2 mb-4"><i class="ph-fill ph-star text-amber-500 text-lg"></i> Sedang Direkomendasikan (<span id="recom-count">0</span>)</h3>
+        <div id="recom-list" class="flex flex-col gap-3 bg-white p-4 rounded-2xl border border-pink-100 shadow-sm min-h-[100px]"></div>
+      </div>
+      <div>
+        <h3 class="text-sm font-bold text-gray-700 mb-4">Menu Lainnya</h3>
+        <div class="relative max-w-md mb-4">
+          <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <input type="text" id="search-recom" placeholder="Cari menu untuk ditambahkan..." class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-pink-200 focus:border-pink-600 outline-none bg-white text-sm">
+        </div>
+        <div id="other-menu-grid" class="grid sm:grid-cols-3 lg:grid-cols-5 gap-4"></div>
+      </div>
+    </section>
+
+    <!-- TAB 4: PENGATURAN -->
+    <section id="view-pengaturan" class="view-section hide">
+      <div class="mb-6">
+        <h2 class="text-xl font-bold text-pink-900">Pengaturan Umum</h2>
+        <p class="text-sm text-gray-500">Ubah teks, info kontak, logo, dan gambar tentang kami.</p>
+      </div>
+      
+      <div class="grid lg:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-3xl border border-pink-100 shadow-sm space-y-5">
+          <h3 class="font-bold text-lg text-pink-900 mb-2 border-b border-pink-100 pb-3 flex items-center gap-2"><i class="ph-fill ph-text-aa text-pink-600"></i> Teks Beranda</h3>
+          <div><label class="block text-sm font-semibold mb-2">Judul (Baris 1)</label><input type="text" id="set-title-1" class="w-full p-3 rounded-xl border border-pink-200 outline-none focus:border-pink-600"></div>
+          <div><label class="block text-sm font-semibold mb-2">Judul (Baris 2)</label><input type="text" id="set-title-2" class="w-full p-3 rounded-xl border border-pink-200 outline-none focus:border-pink-600"></div>
+          <div><label class="block text-sm font-semibold mb-2">Deskripsi</label><textarea id="set-desc-hero" rows="2" class="w-full p-3 rounded-xl border border-pink-200 outline-none focus:border-pink-600 text-sm"></textarea></div>
+          <div><label class="block text-sm font-semibold mb-2">Deskripsi "Tentang Kami"</label><textarea id="set-desc-about" rows="3" class="w-full p-3 rounded-xl border border-pink-200 outline-none focus:border-pink-600 text-sm"></textarea></div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="bg-white p-6 rounded-3xl border border-pink-100 shadow-sm space-y-5">
+            <h3 class="font-bold text-lg text-pink-900 mb-2 border-b border-pink-100 pb-3 flex items-center gap-2"><i class="ph-fill ph-map-pin text-pink-600"></i> Informasi Kontak</h3>
+            <div>
+              <label class="block text-sm font-semibold mb-2">Logo Website</label>
+              <div class="flex items-center gap-4">
+                <div id="prev-logo" class="w-16 h-16 rounded-xl bg-pink-50 border border-pink-200 flex items-center justify-center overflow-hidden shrink-0"><i class="ph ph-image text-gray-400"></i></div>
+                <div class="flex-1 space-y-2">
+                  <input type="text" id="set-logo" placeholder="URL logo..." class="w-full p-2.5 rounded-xl border border-pink-200 outline-none text-sm">
+                  <input type="file" accept="image/*" onchange="uploadToServer(this, 'set-logo', 'prev-logo')" class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-pink-100 file:text-pink-800 hover:file:bg-pink-200 cursor-pointer">
+                </div>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div><label class="block text-sm font-semibold mb-2">Username Instagram</label><input type="text" id="set-ig" class="w-full p-3 rounded-xl border border-pink-200 outline-none focus:border-pink-600"></div>
+              <div><label class="block text-sm font-semibold mb-2">Jam Buka</label><input type="text" id="set-hours" class="w-full p-3 rounded-xl border border-pink-200 outline-none focus:border-pink-600"></div>
+            </div>
+            <div><label class="block text-sm font-semibold mb-2">URL Instagram</label><input type="text" id="set-ig-url" class="w-full p-3 rounded-xl border border-pink-200 outline-none focus:border-pink-600"></div>
+            <div><label class="block text-sm font-semibold mb-2">Alamat Lengkap</label><textarea id="set-address" rows="2" class="w-full p-3 rounded-xl border border-pink-200 outline-none focus:border-pink-600 text-sm"></textarea></div>
+          </div>
+
+          <div class="bg-white p-6 rounded-3xl border border-pink-100 shadow-sm space-y-4">
+            <h3 class="font-bold text-lg text-pink-900 mb-2 border-b border-pink-100 pb-3 flex items-center gap-2"><i class="ph-fill ph-images text-pink-600"></i> Foto "Tentang Kami"</h3>
+            <div id="about-images-container" class="space-y-4"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- MODAL: HERO SLIDE -->
+<div id="modal-hero" class="fixed inset-0 z-50 flex items-center justify-center hide">
+  <div class="modal-overlay absolute inset-0" onclick="closeModal('modal-hero')"></div>
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg relative z-10 overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="p-6 border-b border-pink-100 flex justify-between items-center bg-pink-50/50">
+      <h3 id="hero-modal-title" class="font-bold text-lg text-pink-900">Tambah Slide Baru</h3>
+      <button onclick="closeModal('modal-hero')" class="w-8 h-8 rounded-full bg-white text-gray-500 hover:bg-pink-100 flex items-center justify-center shadow-sm"><i class="ph ph-x"></i></button>
+    </div>
+    
+    <div class="p-6 overflow-y-auto flex-1">
+      <input type="hidden" id="hero-id">
+      <div class="space-y-5">
+        <div>
+          <label class="block text-sm font-semibold mb-2">Tipe</label>
+          <select id="hero-type" class="w-full p-3 rounded-xl border border-pink-200 outline-none focus:border-pink-600 bg-pink-50/30">
+            <option value="image">Gambar</option>
+            <option value="video">Video</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-2">Media</label>
+          <div class="flex items-center gap-4">
+            <div id="hero-preview-box" class="w-20 h-20 rounded-xl bg-pink-50 border border-pink-200 flex items-center justify-center overflow-hidden shrink-0"><i class="ph ph-image text-2xl text-gray-400"></i></div>
+            <div class="flex-1 space-y-2">
+              <input type="text" id="hero-src" placeholder="URL media..." class="w-full p-2.5 rounded-xl border border-pink-200 outline-none text-sm">
+              <input type="file" id="hero-file" accept="image/*,video/mp4" class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-pink-100 file:text-pink-800 hover:file:bg-pink-200 cursor-pointer" onchange="uploadToServer(this, 'hero-src', 'hero-preview-box')">
+            </div>
+          </div>
+        </div>
+        <div><label class="block text-sm font-semibold mb-2">Durasi (ms)</label><input type="number" id="hero-duration" value="5000" class="w-full p-3 rounded-xl border border-pink-200 outline-none focus:border-pink-600"></div>
+        <div class="flex items-center justify-between p-4 bg-pink-50/50 rounded-xl border border-pink-100">
+          <div><h4 class="font-semibold text-sm">Tampilkan di slider</h4><p class="text-xs text-gray-500">Nonaktifkan untuk menyembunyikan</p></div>
+          <div class="relative inline-block w-12 h-6 align-middle select-none transition duration-200 ease-in">
+            <input type="checkbox" id="hero-active" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300"/>
+            <label for="hero-active" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="p-5 border-t border-pink-100 flex justify-end gap-3 bg-pink-50/50">
+      <button onclick="closeModal('modal-hero')" class="px-5 py-2.5 rounded-full text-sm font-semibold text-gray-600 hover:bg-gray-200">Batal</button>
+      <button onclick="saveHeroSlide()" class="px-6 py-2.5 rounded-full text-sm font-bold bg-pink-900 text-white hover:bg-pink-800 shadow-md">Terapkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: MENU -->
+<div id="modal-menu" class="fixed inset-0 z-50 flex items-center justify-center hide">
+  <div class="modal-overlay absolute inset-0" onclick="closeModal('modal-menu')"></div>
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg relative z-10 overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="p-6 border-b border-pink-100 flex justify-between items-center bg-pink-50/50">
+      <h3 id="menu-modal-title" class="font-bold text-lg text-pink-900">Tambah Menu Baru</h3>
+      <button onclick="closeModal('modal-menu')" class="w-8 h-8 rounded-full bg-white text-gray-500 hover:bg-pink-100 flex items-center justify-center shadow-sm"><i class="ph ph-x"></i></button>
+    </div>
+    
+    <div class="p-6 overflow-y-auto flex-1">
+      <input type="hidden" id="menu-id">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold mb-2">Gambar Menu</label>
+          <div class="flex items-center gap-4">
+            <div id="menu-preview-box" class="w-20 h-20 rounded-xl bg-pink-50 border border-pink-200 flex items-center justify-center overflow-hidden shrink-0"><i class="ph ph-image text-2xl text-gray-400"></i></div>
+            <div class="flex-1 space-y-2">
+              <input type="text" id="menu-image" placeholder="URL gambar..." class="w-full p-2.5 rounded-xl border border-pink-200 outline-none text-sm">
+              <input type="file" id="menu-file" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-pink-100 file:text-pink-800 hover:file:bg-pink-200 cursor-pointer" onchange="uploadToServer(this, 'menu-image', 'menu-preview-box')">
+            </div>
+          </div>
+        </div>
+        <div><label class="block text-sm font-semibold mb-2">Nama Menu</label><input type="text" id="menu-name" class="w-full p-3 rounded-xl border border-pink-200 outline-none focus:border-pink-600" placeholder="Mis. Cafe Latte"></div>
+        <div><label class="block text-sm font-semibold mb-2">Deskripsi</label><textarea id="menu-desc" rows="2" class="w-full p-3 rounded-xl border border-pink-200 outline-none focus:border-pink-600 text-sm" placeholder="Deskripsi singkat..."></textarea></div>
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="block text-sm font-semibold mb-2">Harga (Rp)</label><input type="number" id="menu-price" class="w-full p-3 rounded-xl border border-pink-200 outline-none focus:border-pink-600" placeholder="25000"></div>
+          <div>
+            <label class="block text-sm font-semibold mb-2">Kategori</label>
+            <select id="menu-category" class="w-full p-3 rounded-xl border border-pink-200 outline-none focus:border-pink-600 bg-white">
+              <option value="kopi">Kopi</option>
+              <option value="non-kopi">Non-Kopi</option>
+              <option value="makanan">Makanan</option>
+              <option value="cemilan">Cemilan</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex items-center justify-between p-4 bg-pink-50/50 rounded-xl border border-pink-100">
+          <div><h4 class="font-semibold text-sm">Menu Rekomendasi</h4><p class="text-xs text-gray-500">Tampil di carousel halaman utama</p></div>
+          <div class="relative inline-block w-12 h-6 align-middle select-none transition duration-200 ease-in">
+            <input type="checkbox" id="menu-recommended" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300"/>
+            <label for="menu-recommended" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="p-5 border-t border-pink-100 flex justify-end gap-3 bg-pink-50/50">
+      <button onclick="closeModal('modal-menu')" class="px-5 py-2.5 rounded-full text-sm font-semibold text-gray-600 hover:bg-gray-200">Batal</button>
+      <button onclick="saveMenu()" class="px-6 py-2.5 rounded-full text-sm font-bold bg-pink-900 text-white hover:bg-pink-800 shadow-md">Terapkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed top-24 left-1/2 -translate-x-1/2 z-[200] hide">
+  <div class="bg-blue-500 text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 font-semibold text-sm border border-pink-700 toast-anim">
+    <i class="ph ph-check-circle text-lg"></i><span id="toast-msg">Tersimpan!</span>
+  </div>
+</div>
+
+<script>
+const DEFAULT_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23fbcfe8' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'%3E%3C/circle%3E%3Cpolyline points='21 15 16 10 5 21'%3E%3C/polyline%3E%3C/svg%3E";
+const field = id => document.getElementById(id);
+
+let state = { text: {}, logo: '', contact: {}, aboutImages: ['', '', ''], heroSlides: [], menuData: [], recomOrder: [] };
+let originalContent = {};
+
+function showToast(msg, isError = false) {
+  const t = field('toast');
+  t.firstElementChild.className = `text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 font-semibold text-sm border toast-anim ${isError ? 'bg-red-600 border-red-500' : 'bg-pink-900 border-pink-700'}`;
+  field('toast-msg').textContent = msg;
+  t.classList.remove('hide');
+  setTimeout(() => t.classList.add('hide'), 3000);
+}
+
+function setPreview(containerId, src, isVideo = false) {
+  const box = field(containerId);
+  if (!src) { box.innerHTML = `<i class="ph ph-image text-2xl text-gray-400"></i>`; return; }
+  box.innerHTML = isVideo || src.endsWith('.mp4') ? `<video src="${src}" class="w-full h-full object-cover" muted></video>` : `<img src="${src}" class="w-full h-full object-cover">`;
+}
+
+async function uploadToServer(fileInput, targetUrlInputId, previewBoxId) {
+  const file = fileInput.files[0];
+  if (!file) return;
+  field(previewBoxId).innerHTML = '<i class="ph ph-spinner animate-spin text-2xl text-pink-600"></i>';
+  const formData = new FormData();
+  formData.append('image', file);
+  try {
+    const res = await fetch('api/upload.php', { method: 'POST', body: formData, credentials: 'same-origin' });
+    const result = await res.json();
+    if(res.ok && result.ok) {
+      field(targetUrlInputId).value = result.url;
+      setPreview(previewBoxId, result.url, file.type.includes('video'));
+      showToast('File berhasil diunggah!');
+    } else { throw new Error(result.message || 'Upload gagal.'); }
+  } catch(e) {
+    showToast('Gagal upload: ' + e.message, true);
+    setPreview(previewBoxId, field(targetUrlInputId).value);
+  }
+}
+
+function populateSettings() {
+  field('set-title-1').value = state.text?.heroTitleLine1 || '';
+  field('set-title-2').value = state.text?.heroTitleLine2 || '';
+  field('set-desc-hero').value = state.text?.heroDescription || '';
+  field('set-desc-about').value = state.text?.aboutDescription || '';
+  field('set-logo').value = state.logo || '';
+  setPreview('prev-logo', state.logo);
+  field('set-ig').value = state.contact?.instagram || '';
+  field('set-hours').value = state.contact?.hours || '';
+  field('set-ig-url').value = state.contact?.instagramUrl || '';
+  field('set-address').value = state.contact?.address || '';
+
+  const abContainer = field('about-images-container');
+  const abImgs = state.aboutImages || ['','',''];
+  abContainer.innerHTML = abImgs.map((url, i) => `
+    <div class="flex items-center gap-4">
+      <div id="prev-ab-${i}" class="w-14 h-14 rounded-xl bg-pink-50 border border-pink-200 flex items-center justify-center overflow-hidden shrink-0">
+        ${url ? `<img src="${url}" class="w-full h-full object-cover">` : `<i class="ph ph-image text-gray-400"></i>`}
+      </div>
+      <div class="flex-1 space-y-1.5">
+        <input type="text" id="set-ab-${i}" value="${url}" placeholder="URL Gambar ${i+1}" class="w-full p-2 rounded-lg border border-pink-200 outline-none text-xs focus:border-pink-600">
+        <input type="file" accept="image/*" onchange="uploadToServer(this, 'set-ab-${i}', 'prev-ab-${i}')" class="w-full text-[10px] text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-[10px] file:font-semibold file:bg-pink-100 file:text-pink-800 hover:file:bg-pink-200 cursor-pointer">
+      </div>
+    </div>
+  `).join('');
+}
+
+function processIncomingData(data) {
+  originalContent = data;
+  state.text = data.text || {};
+  state.logo = data.logo || '';
+  state.contact = data.contact || {};
+  state.aboutImages = data.aboutImages || ['','',''];
+  state.heroSlides = data.heroSlides || [];
+  state.menuData = (data.menuData || []).map((m, i) => ({ ...m, id: m.id ? String(m.id) : `old_${i}` }));
+  
+  state.recomOrder = [];
+  if (data.recommendedMenu && Array.isArray(data.recommendedMenu)) {
+    data.recommendedMenu.forEach(rm => {
+      let found = state.menuData.find(m => m.name === rm.name);
+      if (found) {
+        found.recommended = true;
+        if(rm.image) found.image = rm.image;
+        state.recomOrder.push(found.id);
+      }
+    });
+  }
+  populateSettings();
+  renderHero();
+  renderMenu();
+  renderRekomendasi();
+}
+
+async function loadContent() {
+  try {
+    const res = await fetch('api/content.php', { credentials: 'same-origin' });
+    const result = await res.json();
+    if(res.ok && result.ok && result.content) {
+      processIncomingData(result.content);
+    }
+  } catch(e) { console.error('Failed to load data:', e); }
+}
+
+async function saveContentToServer() {
+  state.text.heroTitleLine1 = field('set-title-1').value;
+  state.text.heroTitleLine2 = field('set-title-2').value;
+  state.text.heroDescription = field('set-desc-hero').value;
+  state.text.aboutDescription = field('set-desc-about').value;
+  state.logo = field('set-logo').value;
+  state.contact.instagram = field('set-ig').value;
+  state.contact.hours = field('set-hours').value;
+  state.contact.instagramUrl = field('set-ig-url').value;
+  state.contact.address = field('set-address').value;
+  
+  state.aboutImages = [];
+  for(let i=0; i<3; i++) {
+    const inp = field(`set-ab-${i}`);
+    if(inp) state.aboutImages.push(inp.value);
+  }
+
+  const payload = {
+    ...originalContent,
+    text: state.text,
+    logo: state.logo,
+    contact: state.contact,
+    aboutImages: state.aboutImages,
+    heroSlides: state.heroSlides,
+    menuData: state.menuData,
+    recommendedMenu: state.recomOrder.map(id => {
+      const m = state.menuData.find(x => x.id === id);
+      return { name: m.name, image: m.image || '', desc: m.desc || '' };
+    }),
+    updatedAt: new Date().toISOString()
+  };
+
+  try {
+    const btn = document.querySelector('button[onclick="saveContentToServer()"]');
+    btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Menyimpan';
+    btn.disabled = true;
+
+    const res = await fetch('api/content.php', { 
+      method: 'POST', 
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    
+    if(res.ok && result.ok) {
+      field('save-status').textContent = `Tersimpan ${new Date().toLocaleTimeString('id-ID')}`;
+      showToast('Berhasil disimpan ke Server LOTUS COFFEE!');
+    } else { throw new Error(result.message || 'Simpan gagal.'); }
+  } catch(e) {
+    showToast(e.message, true);
+  } finally {
+    const btn = document.querySelector('button[onclick="saveContentToServer()"]');
+    btn.innerHTML = '<i class="ph ph-cloud-arrow-up"></i> Simpan ke Server';
+    btn.disabled = false;
+  }
+}
+
+function setLoggedIn(loggedIn) {
+  field('login-view').classList.toggle('hide', loggedIn);
+  field('dashboard-view').classList.toggle('hide', !loggedIn);
+}
+
+async function checkSession() {
+  try {
+    const res = await fetch('api/session.php', { credentials: 'same-origin' });
+    const session = await res.json();
+    if(session.ok) { setLoggedIn(true); await loadContent(); } 
+    else { setLoggedIn(false); }
+  } catch(e) { setLoggedIn(false); field('login-message').textContent = 'Koneksi API belum terhubung.'; }
+}
+
+field('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  field('login-message').textContent = 'Memeriksa...';
+  try {
+    const res = await fetch('api/login.php', {
+      method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: field('email').value, password: field('password').value })
+    });
+    const result = await res.json();
+    if(res.ok && result.ok) {
+      field('login-message').textContent = '';
+      field('password').value = '';
+      await checkSession();
+    } else { throw new Error(result.message || 'Login gagal.'); }
+  } catch(err) { field('login-message').textContent = err.message; }
+});
+
+field('logout-button').addEventListener('click', async () => {
+  await fetch('api/logout.php', { credentials: 'same-origin' });
+  setLoggedIn(false);
+});
+
+const formatRp = (angka) => "Rp " + Number(angka).toLocaleString('id-ID');
+const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
+const closeModal = (id) => field(id).classList.add('hide');
+
+function switchTab(tabId) {
+  document.querySelectorAll('.view-section').forEach(el => el.classList.add('hide'));
+  field(`view-${tabId}`).classList.remove('hide');
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('bg-pink-900', 'text-white');
+    btn.classList.add('bg-transparent', 'text-gray-500');
+  });
+  const activeBtn = field(`tab-${tabId}`);
+  activeBtn.classList.remove('bg-transparent', 'text-gray-500');
+  activeBtn.classList.add('bg-pink-900', 'text-white');
+}
+
+// HERO LOGIC
+function renderHero() {
+  field('hero-grid').innerHTML = state.heroSlides.map((slide, index) => `
+    <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-pink-100 flex flex-col relative">
+      <div class="h-48 bg-gray-100 relative">
+        ${(slide.active === false) ? `<div class="absolute inset-0 bg-white/60 z-10 flex flex-col items-center justify-center backdrop-blur-[1px]"><i class="ph-fill ph-eye-slash text-2xl text-pink-600 mb-1"></i><span class="text-xs font-bold text-pink-900">Disembunyikan</span></div>` : ''}
+        ${slide.type === 'video' ? `<video src="${slide.src}" class="w-full h-full object-cover" muted autoplay loop></video>` : `<img src="${slide.src}" onerror="this.src='${DEFAULT_IMAGE}'" class="w-full h-full object-cover">`}
+        <div class="absolute top-2 left-2 bg-pink-900/80 text-white text-[10px] px-2 py-1 rounded-md font-bold uppercase backdrop-blur-sm z-20 flex items-center gap-1">${slide.type === 'video' ? '<i class="ph-fill ph-video-camera"></i>' : '<i class="ph-fill ph-image"></i>'}</div>
+      </div>
+      <div class="p-4 flex-1 flex flex-col justify-between bg-white z-20">
+        <div><h3 class="font-bold text-pink-900 truncate">${slide.title || 'Slide '+(index+1)}</h3><p class="text-xs text-gray-500 truncate">${slide.duration ? slide.duration+'ms' : 'Video'}</p></div>
+        <div class="flex items-center justify-between mt-4 pt-3 border-t border-pink-50">
+          <div class="flex gap-1">
+            <button onclick="moveHero(${index}, -1)" class="w-8 h-8 rounded-lg bg-pink-50 hover:bg-pink-100 text-pink-900 flex items-center justify-center transition" title="Naik" ${index===0?'disabled opacity-50':''}><i class="ph ph-arrow-up"></i></button>
+            <button onclick="moveHero(${index}, 1)" class="w-8 h-8 rounded-lg bg-pink-50 hover:bg-pink-100 text-pink-900 flex items-center justify-center transition" title="Turun" ${index===state.heroSlides.length-1?'disabled opacity-50':''}><i class="ph ph-arrow-down"></i></button>
+          </div>
+          <div class="flex gap-1">
+            <button onclick="openHeroModal('${slide.id || index}')" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center transition" title="Edit"><i class="ph ph-pencil-simple"></i></button>
+            <button onclick="deleteHero('${slide.id || index}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition" title="Hapus"><i class="ph ph-trash"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+function moveHero(index, dir) {
+  const n = index + dir;
+  if(n < 0 || n >= state.heroSlides.length) return;
+  const temp = state.heroSlides[index]; state.heroSlides[index] = state.heroSlides[n]; state.heroSlides[n] = temp;
+  renderHero();
+}
+function deleteHero(idOrIndex) {
+  if(confirm('Hapus slide ini?')) {
+    if(typeof idOrIndex === 'number' || !isNaN(idOrIndex)) state.heroSlides.splice(Number(idOrIndex), 1);
+    else state.heroSlides = state.heroSlides.filter(s => s.id !== idOrIndex);
+    renderHero();
+  }
+}
+function openHeroModal(id = null) {
+  field('modal-hero').classList.remove('hide');
+  field('hero-modal-title').textContent = id !== null ? 'Edit Slide' : 'Tambah Slide';
+  let s = id !== null ? (isNaN(id) ? state.heroSlides.find(x => x.id === id) : state.heroSlides[Number(id)]) : null;
+  field('hero-id').value = id !== null ? (s.id || id) : '';
+  field('hero-type').value = s ? s.type : 'image';
+  field('hero-src').value = s ? s.src : '';
+  field('hero-duration').value = s ? (s.duration||5000) : 5000;
+  field('hero-active').checked = s ? (s.active !== false) : true;
+  field('hero-file').value = '';
+  setPreview('hero-preview-box', s ? s.src : '', s && s.type==='video');
+}
+field('hero-type').addEventListener('change', e => {
+  field('hero-duration').parentElement.classList.toggle('hide', e.target.value === 'video');
+  setPreview('hero-preview-box', field('hero-src').value, e.target.value==='video');
+});
+field('hero-src').addEventListener('input', e => setPreview('hero-preview-box', e.target.value, field('hero-type').value==='video'));
+function saveHeroSlide() {
+  const id = field('hero-id').value;
+  const slide = {
+    id: id || generateId(), type: field('hero-type').value, src: field('hero-src').value,
+    duration: parseInt(field('hero-duration').value) || 5000, active: field('hero-active').checked
+  };
+  if(slide.type === 'video') delete slide.duration;
+  if(id) {
+    const idx = isNaN(id) ? state.heroSlides.findIndex(x=>x.id===id) : Number(id);
+    state.heroSlides[idx] = slide;
+  } else { state.heroSlides.push(slide); }
+  renderHero(); closeModal('modal-hero');
+}
+
+// MENU LOGIC
+function renderMenu() {
+  const search = field('search-menu').value.toLowerCase();
+  const cat = field('filter-category').value;
+  const filtered = state.menuData.filter(m => (m.name.toLowerCase().includes(search) || (m.desc||'').toLowerCase().includes(search)) && (cat === 'all' || m.category === cat));
+  
+  field('menu-grid').innerHTML = filtered.map(m => `
+    <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-pink-100 flex flex-col relative group">
+      <div class="absolute top-2 left-2 z-10 px-2 py-1 rounded bg-pink-900/80 text-white text-[10px] font-bold uppercase backdrop-blur-md">${m.category}</div>
+      <div class="h-44 bg-gray-100"><img src="${m.image || DEFAULT_IMAGE}" class="w-full h-full object-cover"></div>
+      <div class="p-4 flex flex-col flex-1">
+        <div class="flex justify-between items-start gap-2 mb-1"><h3 class="font-bold text-pink-900 leading-tight">${m.name}</h3><span class="font-bold text-pink-600 text-sm whitespace-nowrap">${formatRp(m.price)}</span></div>
+        <p class="text-xs text-gray-500 line-clamp-2 mb-4 flex-1">${m.desc||''}</p>
+        <div class="flex items-center gap-2 pt-3 border-t border-pink-50">
+          <button onclick="toggleRec('${m.id}')" class="flex-1 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 ${m.recommended ? 'bg-amber-100 text-amber-800' : 'bg-pink-50 text-pink-800 hover:bg-pink-100'}"><i class="ph-fill ph-star"></i> ${m.recommended?'Direkomendasi':'Rekomendasi'}</button>
+          <button onclick="openMenuModal('${m.id}')" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center transition shrink-0" title="Edit"><i class="ph ph-pencil-simple"></i></button>
+          <button onclick="deleteMenu('${m.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition shrink-0" title="Hapus"><i class="ph ph-trash"></i></button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+field('search-menu').addEventListener('input', renderMenu);
+field('filter-category').addEventListener('change', renderMenu);
+
+function openMenuModal(id = null) {
+  field('modal-menu').classList.remove('hide');
+  field('menu-modal-title').textContent = id ? 'Edit Menu' : 'Tambah Menu';
+  const m = id ? state.menuData.find(x => x.id === id) : null;
+  field('menu-id').value = id || '';
+  field('menu-image').value = m ? (m.image||'') : '';
+  field('menu-name').value = m ? m.name : '';
+  field('menu-desc').value = m ? (m.desc||'') : '';
+  field('menu-price').value = m ? m.price : '';
+  field('menu-category').value = m ? m.category : 'kopi';
+  field('menu-recommended').checked = m ? !!m.recommended : false;
+  field('menu-file').value = '';
+  setPreview('menu-preview-box', m ? m.image : '');
+}
+field('menu-image').addEventListener('input', e => setPreview('menu-preview-box', e.target.value));
+
+function saveMenu() {
+  const id = field('menu-id').value;
+  const isRec = field('menu-recommended').checked;
+  const menu = {
+    id: id || generateId(), image: field('menu-image').value, name: field('menu-name').value,
+    desc: field('menu-desc').value, price: parseInt(field('menu-price').value) || 0,
+    category: field('menu-category').value, recommended: isRec
+  };
+  if(id) {
+    const idx = state.menuData.findIndex(x => x.id === id);
+    const oldRec = state.menuData[idx].recommended;
+    state.menuData[idx] = menu;
+    if(isRec && !oldRec) state.recomOrder.push(id);
+    if(!isRec && oldRec) state.recomOrder = state.recomOrder.filter(x=>x!==id);
+  } else {
+    state.menuData.push(menu);
+    if(isRec) state.recomOrder.push(menu.id);
+  }
+  renderMenu(); renderRekomendasi(); closeModal('modal-menu');
+}
+function deleteMenu(id) {
+  if(confirm('Hapus menu ini?')) {
+    state.menuData = state.menuData.filter(x => x.id !== id);
+    state.recomOrder = state.recomOrder.filter(x => x !== id);
+    renderMenu(); renderRekomendasi();
+  }
+}
+
+// REKOMENDASI LOGIC
+function renderRekomendasi() {
+  const search = field('search-recom').value.toLowerCase();
+  field('recom-count').textContent = state.recomOrder.length;
+  
+  field('recom-list').innerHTML = state.recomOrder.length === 0 ? `<div class="text-center py-6 text-sm text-gray-400">Belum ada menu yang direkomendasikan</div>` : state.recomOrder.map((id, i) => {
+    const m = state.menuData.find(x => x.id === id);
+    if(!m) return '';
+    return `
+      <div class="flex items-center justify-between p-3 rounded-xl border border-pink-100 bg-pink-50/40 hover:bg-white transition group">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-lg overflow-hidden shrink-0"><img src="${m.image||DEFAULT_IMAGE}" class="w-full h-full object-cover"></div>
+          <div><h4 class="font-bold text-pink-900 text-sm leading-tight">${m.name}</h4><p class="text-xs text-gray-500">${formatRp(m.price)} • ${m.category}</p></div>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="flex flex-col gap-0.5">
+            <button onclick="moveRec(${i}, -1)" class="w-7 h-6 bg-white border border-pink-200 rounded flex items-center justify-center text-pink-900 hover:bg-pink-100 transition" title="Naik" ${i===0?'opacity-30':''}><i class="ph ph-arrow-up text-[11px]"></i></button>
+            <button onclick="moveRec(${i}, 1)" class="w-7 h-6 bg-white border border-pink-200 rounded flex items-center justify-center text-pink-900 hover:bg-pink-100 transition" title="Turun" ${i===state.recomOrder.length-1?'opacity-30':''}><i class="ph ph-arrow-down text-[11px]"></i></button>
+          </div>
+          <button onclick="toggleRec('${m.id}')" class="w-8 h-8 ml-2 rounded-lg text-red-500 hover:bg-red-50 flex items-center justify-center transition" title="Hapus dari Rekomendasi"><i class="ph ph-trash"></i></button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  const others = state.menuData.filter(m => !m.recommended && m.name.toLowerCase().includes(search));
+  field('other-menu-grid').innerHTML = others.map(m => `
+    <div class="bg-white border border-pink-100 rounded-xl p-3 flex flex-col items-center text-center gap-2 hover:shadow-md transition">
+      <div class="w-14 h-14 rounded-full overflow-hidden bg-pink-50"><img src="${m.image||DEFAULT_IMAGE}" class="w-full h-full object-cover"></div>
+      <div><h4 class="font-bold text-pink-900 text-xs truncate w-full">${m.name}</h4><p class="text-[10px] text-gray-500">${formatRp(m.price)}</p></div>
+      <button onclick="toggleRec('${m.id}')" class="mt-1 w-full py-1.5 rounded-lg bg-pink-50 text-pink-900 hover:bg-pink-900 hover:text-white text-[10px] font-bold transition flex items-center justify-center gap-1"><i class="ph ph-plus"></i> Tambah</button>
+    </div>
+  `).join('');
+}
+field('search-recom').addEventListener('input', renderRekomendasi);
+
+function toggleRec(id) {
+  const m = state.menuData.find(x => x.id === id);
+  m.recommended = !m.recommended;
+  if(m.recommended) state.recomOrder.push(id); else state.recomOrder = state.recomOrder.filter(x => x !== id);
+  renderMenu(); renderRekomendasi();
+}
+function moveRec(i, dir) {
+  const n = i + dir;
+  if(n<0 || n>=state.recomOrder.length) return;
+  const temp = state.recomOrder[i]; state.recomOrder[i] = state.recomOrder[n]; state.recomOrder[n] = temp;
+  renderRekomendasi();
+}
+
+// Start
+switchTab('hero');
+checkSession();
+</script>
+</body>
+</html>
